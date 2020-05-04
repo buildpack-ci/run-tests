@@ -1,0 +1,8 @@
+name: 'Herokuish'
+description: 'Build an app with Herokuish to emulate a Heroku build'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+branding:
+  icon: 'battery'
+  color: 'orange'

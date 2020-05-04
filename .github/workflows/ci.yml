@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    # build the Github Actions container
+    - run: docker build --rm -t tmpbuild .
+
+    # clone a public repo and use for test
+    - uses: actions/checkout@v2
+      with:
+        repository: heroku/python-getting-started
+        path: app
+    - run: docker run --rm -v ${GITHUB_WORKSPACE}/app:/github/workspace tmpbuild
