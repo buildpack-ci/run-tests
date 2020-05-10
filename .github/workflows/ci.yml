@@ -3,15 +3,40 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repository:
+        - heroku/node-js-getting-started
+        - heroku/ruby-getting-started
+        - heroku/java-getting-started
+        - heroku/go-getting-started
+        - heroku/scala-getting-started
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
     - uses: actions/checkout@v2
-
-    # build the Github Actions container
-    - run: docker build --rm -t tmpbuild .
 
     # clone a public repo and use for test
     - uses: actions/checkout@v2
       with:
-        repository: heroku/python-getting-started
+        repository: ${{ matrix.repository }}
         path: app
-    - run: docker run --rm -v ${GITHUB_WORKSPACE}/app:/github/workspace tmpbuild
+
+    - uses: vincetse/herokuish-action@dev
+      env:
+        APP_SUBDIR: app
+        DATABASE_URL: postgres://postgres:postgres@postgres:5432/test
+        # only used for Ruby
+        DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
