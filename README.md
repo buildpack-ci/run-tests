@@ -1,12 +1,58 @@
-# Herokuish GitHub Action
+# Buildpack CI Run-Tests
 
-A GitHub Action that builds an application like [Heroku](https://www.heroku.com/) would by using the [Herokuish](https://github.com/gliderlabs/herokuish) container to emulate the Heroku build process.
+Have you enjoyed the convenience that [buildpacks](https://devcenter.heroku.com/articles/buildpacks) give you, especially on the [Heroku](https://www.heroku.com/) platform, and wished you can have the same convenience in your CI/CD pipeline?  You are probably not alone!
+
+Buildpack CI Run-Tests is a [GitHub Actions](https://github.com/features/actions) that uses [Herokuish](https://github.com/gliderlabs/herokuish) to give us this convenience on the GitHub platform.  In the simplest case, adding one line to your GitHub Actions [workflow](https://help.github.com/en/actions/configuring-and-managing-workflows/configuring-a-workflow) will build and run unit tests for your app.
+
+  * [Usage](#usage)
+  * [Supported Languages](#supported-languages)
+    + [Natively-Supported Languages](#natively-supported-languages)
+    + [Custom Buildpack Languages](#custom-buildpack-languages)
+  * [Examples](#examples)
+    + [Basic Usage](#basic-usage)
+    + [Custom Buildpack](#custom-buildpack)
+    + [Multiple Buildpacks](#multiple-buildpacks)
+    + [Rails Apps](#rails-apps)
+    + [Django Apps](#django-apps)
+    + [Some Example Workflows](#some-example-workflows)
+  * [Rationale](#rationale)
+  * [References](#references)
 
 ## Usage
 
+Super-simple.  Just add the following line to your workflow.  See examples below.
+
+```
+    - uses: buildpack-ci/run-tests@v1
+```
+
+
+## Supported Languages
+
+### Natively-Supported Languages
+
+Run-Tests rely on the `bin/test` and `bin/test-compile` scripts within buildpacks to build and trigger the unit tests.  The following languages (which use [Heroku officially-supported buildpacks](https://elements.heroku.com/buildpacks)) will work out of the box.
+
+1. Ruby
+1. Java
+1. Scala
+1. Golang
+1. NodeJS
+
+### Custom Buildpack Languages
+
+The "native" buildpacks for some languages don't include the necessary scripts (i.e. `bin/test` and `bin/test-compile`), so one will have to create your own buildpack to get the scripts added.  The following buildpacks have been forked to add the necessary scripts.
+
+1. https://github.com/vincetse/heroku-buildpack-python.git (PR heroku/heroku-buildpack-python#982 submitted to add scripts)
+1. https://github.com/buildpack-ci/heroku-buildpack-multi.git
+1. https://github.com/buildpack-ci/null-buildpack.git
+
+
+## Examples
+
 ### Basic Usage
 
-Here is [an example GitHub Workflow](https://github.com/vincetse/node-js-getting-started/blob/master/.github/workflows/ci.yml) that uses the `master` branch of this action.
+Here is [an example](https://github.com/buildpack-ci/nodejs-example/blob/master/.github/workflows/ci.yml) of the most basic usage with an app that does not require a database server component.
 
 ```
 name: CI
@@ -15,13 +61,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: vincetse/herokuish-action@master
+    - name: Clone code repo
+      uses: actions/checkout@v2
+    - name: Build and run unit tests with Buildpack CI
+      uses: buildpack-ci/run-tests@v1
 ```
 
 ### Custom Buildpack
 
-Need to use a custom buildpack?  You can do so by setting the `buildpack_url` input parameter.
+Need to use a custom buildpack?  You can do so by setting the `BUILDPACK_URL` environment variable to the URL of the buildpack that you need for your application.  This example builds a Perl app which isn't supported natively by Herokuish.
 
 ```
 name: CI
@@ -30,22 +78,32 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: vincetse/herokuish-action@master
+    - name: Clone code repo
+      uses: actions/checkout@v2
+    - name: Build and run unit tests with Buildpack CI
+      uses: buildpack-ci/run-tests@v1
       env:
-        BUILDPACK_URL: https://github.com/heroku/heroku-buildpack-nodejs.git
+        BUILDPACK_URL: https://github.com/vincetse/heroku-buildpack-python.git
 ```
 
 ### Multiple Buildpacks
 
-The Herokuish container used supports multiple buildpacks being defined in a file named `.buildpacks` at the root of the repo being built.  [Dokku](http://dokku.viewdocs.io/dokku/) has the best [documentation](http://dokku.viewdocs.io/dokku~v0.11.1/deployment/methods/buildpacks/#specifying-a-custom-buildpack) I can find on this topic.
+If your application uses multiple buildpacks, you will need to do 2 things:
 
-### Building a Rails App
+1. Use the [buildpack-ci/heroku-buildpack-multi] as the custom buildpack by setting the environment variable `BUILDPACK_URL` to a value of `https://github.com/buildpack-ci/heroku-buildpack-multi.git`.
+1. At the root of your application directory, create a file named `.buildpacks` with the URL of each buildpack you want to use for your application.  [Dokku](http://dokku.viewdocs.io/dokku/) has the best [documentation](http://dokku.viewdocs.io/dokku~v0.11.1/deployment/methods/buildpacks/#specifying-a-custom-buildpack) I can find on this topic.
 
-Here is [an example GitHub Workflow](https://github.com/vincetse/todos-api/blob/master/.github/workflows/herokuish-build.yml) that builds a Rails app with a Postgresql database.
+Note that if one of the buildpacks does not support tests (i.e. have the `bin/test` and `bin/test-compile` scripts), you can skip over those buildpacks by defining the `BUILDPACK_MULTI_PASS_IF_MISSING_TEST_SCRIPTS` variable to a value of `true`.
+
+The [buildpack-ci/django-app-multi-buildpack](https://github.com/buildpack-ci/django-app-multi-buildpack) example application demonstrates such a configuration in its [CI configuration](https://github.com/buildpack-ci/django-app-multi-buildpack/blob/master/.github/workflows/ci.yml).
+
+
+### Rails Apps
+
+This Rails app demonstrates how to use a Postgresql container during the build & test process by [using a service within the workflow](https://github.com/buildpack-ci/rails-example/blob/master/.github/workflows/ci.yml#L7-L19).
 
 ```
-name: CI via Herokuish
+name: CI
 on: [push, pull_request]
 jobs:
   ci:
@@ -66,17 +124,70 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: vincetse/herokuish-action@master
+    - name: Clone code repo
+      uses: actions/checkout@v2
+    - name: Build and run unit tests with Buildpack CI
+      uses: buildpack-ci/run-tests@v1
         env:
           DATABASE_URL: postgres://postgres:postgres@postgres:5432/test
           RAILS_ENV: test
           DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
 ```
 
-## Sample Run
+### Django Apps
 
-You can see [a sample run](https://github.com/vincetse/node-js-getting-started/runs/648336858?check_suite_focus=true) here.
+Running a Django app on Heroku requires the app to read database credentials from the `DATABASE_URL` environment variable, and we have stuck with that convention for this example.  The [dj-database-url](https://github.com/jacobian/dj-database-url) Python package makes it very convenient to use `DATABASE_URL` to pass database credentials to the application.
 
-![sample run](img/sample.png)
+```
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+    - name: Clone code repo
+      uses: actions/checkout@v2
+    - name: Build and run unit tests with Buildpack CI
+      uses: buildpack-ci/run-tests@v1
+      env:
+        BUILDPACK_URL: https://github.com/vincetse/heroku-buildpack-python
+        DATABASE_URL: postgres://postgres:postgres@postgres:5432/test
+```
+
+### Some Example Workflows
+
+The following are a bunch of GitHub Actions workflows for example apps.  Make sure to check out the workflow files too.
+
+1. https://github.com/buildpack-ci/django-example/actions/runs/119584374
+1. https://github.com/buildpack-ci/nodejs-example/actions/runs/119944160
+1. https://github.com/buildpack-ci/rails-example/actions/runs/119767216
+1. https://github.com/buildpack-ci/django-app-multi-buildpack/actions/runs/120027240
+
+
+## Rationale
+
+Configuring CI for frameworks such as Ruby-on-Rails or Django is pretty straightforward, but may involve several steps that require referring to a manual to jolt one's memory on how to configure the setup.  [GitLab Auto Devops](https://about.gitlab.com/stages-devops-lifecycle/auto-devops/) simplifies the CI for developers with a zero-configuration functionality, but one will have to go off-platform for the convenience.  This tool aims to provide a low-effort option right on the GitHub platform.
+
+This tool was conceived while the author was sheltering in place in New York City during the COVID-19 pandemic, and process of designing and assembling the pieces provided a fun project in these tough times.  Hopefully, it will delight the GitHub community too.
+
+
+## References
+
+1. https://github.com/gliderlabs/herokuish/issues/349
+1. https://github.com/heroku/heroku-buildpack-python/issues/477
+1. https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26941
+1. https://www.heroku.com/continuous-integration

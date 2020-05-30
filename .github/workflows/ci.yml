@@ -34,7 +34,7 @@ jobs:
         repository: ${{ matrix.repository }}
         path: app
 
-    - uses: vincetse/herokuish-action@dev
+    - uses: buildpack-ci/run-tests@master
       env:
         APP_SUBDIR: app
         DATABASE_URL: postgres://postgres:postgres@postgres:5432/test
