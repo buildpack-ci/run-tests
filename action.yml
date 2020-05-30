@@ -1,5 +1,5 @@
 name: 'Buildpack CI'
-description: 'Automatically build and run unit tests with buildpacks for your app (a la Heroku) so that you can focus on building your app instead of thinking about how to configure CI to test the app.'
+description: 'Easily run builds and unit tests with minimal configuration efforts by using buildpacks a la Heroku'
 runs:
   using: 'docker'
   image: 'Dockerfile'
