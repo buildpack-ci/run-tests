@@ -180,9 +180,17 @@ The following are a bunch of GitHub Actions workflows for example apps.  Make su
 
 ## Rationale
 
-Configuring CI for frameworks such as Ruby-on-Rails or Django is pretty straightforward, but may involve several steps that require referring to a manual to jolt one's memory on how to configure the setup.  [GitLab Auto Devops](https://about.gitlab.com/stages-devops-lifecycle/auto-devops/) simplifies the CI for developers with a zero-configuration functionality, but one will have to go off-platform for the convenience.  This tool aims to provide a low-effort option right on the GitHub platform.
+Configuring CI for frameworks such as Ruby-on-Rails or Django is pretty straightforward, but may involve several steps that require referring to a manual to jolt one's memory on how to configure the setup.  [GitLab Auto DevOps](https://about.gitlab.com/stages-devops-lifecycle/auto-devops/) simplifies the CI for developers with a zero-configuration functionality, but one will have to go off-platform for the convenience.  This tool aims to provide a low-effort option right on the GitHub platform.
 
 This tool was conceived while the author was sheltering in place in New York City during the COVID-19 pandemic, and process of designing and assembling the pieces provided a fun project in these tough times.  Hopefully, it will delight the GitHub community too.
+
+
+## Passing Thoughts
+
+* [Cloud Native Buildpacks](https://buildpacks.io/) are really cool!  They are probably going to be the future, and one should really explore them.  They don't support running unit tests automatically right now, but one can probably work around that.
+* [Heroku CI](https://www.heroku.com/continuous-integration) looks pretty sweet for those already paying Heroku.  Some would argue lock-in is a concern, but speaking from past experience, most of us are more worried about lock-in than we should be since most of us will never exercise other options any way.
+* [GitLab Auto DevOps](https://about.gitlab.com/stages-devops-lifecycle/auto-devops/) is a very nice feature.  Why hasn't GitHub also launched such functionality?
+* Google Cloud, AWS, and Microsoft Azure have similar functionality too, right?  I can't remember.
 
 
 ## References
@@ -191,3 +199,4 @@ This tool was conceived while the author was sheltering in place in New York Cit
 1. https://github.com/heroku/heroku-buildpack-python/issues/477
 1. https://gitlab.com/gitlab-org/gitlab-foss/-/issues/26941
 1. https://www.heroku.com/continuous-integration
+1. https://buildpacks.io/
