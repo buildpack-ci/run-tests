@@ -52,7 +52,7 @@ The "native" buildpacks for some languages don't include the necessary scripts (
 
 ### Basic Usage
 
-Here is [an example](https://github.com/buildpack-ci/nodejs-example/blob/master/.github/workflows/ci.yml) of the most basic usage with an app that does not require a database server component.
+Here is [an example](https://github.com/buildpack-ci/nodejs-example/blob/main/.github/workflows/ci.yml) of the most basic usage with an app that does not require a database server component.
 
 ```
 name: CI
@@ -95,12 +95,12 @@ If your application uses multiple buildpacks, you will need to do 2 things:
 
 Note that if one of the buildpacks does not support tests (i.e. have the `bin/test` and `bin/test-compile` scripts), you can skip over those buildpacks by defining the `BUILDPACK_MULTI_PASS_IF_MISSING_TEST_SCRIPTS` variable to a value of `true`.
 
-The [buildpack-ci/django-app-multi-buildpack](https://github.com/buildpack-ci/django-app-multi-buildpack) example application demonstrates such a configuration in its [CI configuration](https://github.com/buildpack-ci/django-app-multi-buildpack/blob/master/.github/workflows/ci.yml).
+The [buildpack-ci/django-app-multi-buildpack](https://github.com/buildpack-ci/django-app-multi-buildpack) example application demonstrates such a configuration in its [CI configuration](https://github.com/buildpack-ci/django-app-multi-buildpack/blob/main/.github/workflows/ci.yml).
 
 
 ### Rails Apps
 
-This Rails app demonstrates how to use a Postgresql container during the build & test process by [using a service within the workflow](https://github.com/buildpack-ci/rails-example/blob/master/.github/workflows/ci.yml#L7-L19).
+This Rails app demonstrates how to use a Postgresql container during the build & test process by [using a service within the workflow](https://github.com/buildpack-ci/rails-example/blob/main/.github/workflows/ci.yml#L7-L19).
 
 ```
 name: CI
