@@ -34,7 +34,7 @@ jobs:
         repository: ${{ matrix.repository }}
         path: app
 
-    - uses: buildpack-ci/run-tests@master
+    - uses: buildpack-ci/run-tests@main
       env:
         APP_SUBDIR: app
         DATABASE_URL: postgres://postgres:postgres@postgres:5432/test
