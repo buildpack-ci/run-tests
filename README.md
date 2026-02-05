@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:11
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
           POSTGRES_DB: test
@@ -125,7 +125,7 @@ jobs:
 
     steps:
     - name: Clone code repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
     - name: Build and run unit tests with Buildpack CI
       uses: buildpack-ci/run-tests@v1
         env:
