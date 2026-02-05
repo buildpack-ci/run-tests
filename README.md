@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone code repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
     - name: Build and run unit tests with Buildpack CI
       uses: buildpack-ci/run-tests@v1
 ```
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Clone code repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
     - name: Build and run unit tests with Buildpack CI
       uses: buildpack-ci/run-tests@v1
       env:
@@ -160,7 +160,7 @@ jobs:
           --health-retries 5
     steps:
     - name: Clone code repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
     - name: Build and run unit tests with Buildpack CI
       uses: buildpack-ci/run-tests@v1
       env:
